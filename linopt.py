@@ -13,7 +13,7 @@ from pathlib import Path
 
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 APP_NAME = "LinOpt System Optimizer Suite"
 CONFIG_PATH = Path("/etc/auto-cpufreq.conf")
@@ -342,7 +342,6 @@ if __name__ == "__main__":
     if os.geteuid() != 0:
         print("LinOpt requires administrator privileges. Launch it through pkexec.", file=sys.stderr)
         sys.exit(1)
-    from gi.repository import GLib
     app = LinuxOptimizerApp()
     app.connect("destroy", Gtk.main_quit)
     app.show_all()
