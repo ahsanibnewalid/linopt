@@ -1,0 +1,39 @@
+name: LinOpt CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Validate Python syntax
+        run: python -m py_compile linopt.py tests/test_linopt.py
+      - name: Run safety regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate packaging shell syntax
+        run: sh -n packaging/build-deb.sh
+      - name: Install Debian package tooling
+        run: sudo apt-get update && sudo apt-get install -y dpkg-dev
+      - name: Build Debian package
+        run: ./packaging/build-deb.sh
+      - name: Inspect Debian package metadata
+        run: dpkg-deb --info dist/linopt_1.2.0_all.deb
+      - name: Upload Debian package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linopt-deb
+          path: dist/linopt_1.2.0_all.deb
+          if-no-files-found: error
