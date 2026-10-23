@@ -13,7 +13,7 @@ from pathlib import Path
 
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
 APP_NAME = "LinOpt System Optimizer Suite"
 CONFIG_PATH = Path("/etc/auto-cpufreq.conf")
@@ -28,7 +28,6 @@ turbo = never
 governor = performance
 turbo = auto
 """
-ICON_PATH = Path("/usr/local/share/linopt/linopt-icon.png")
 TIMER_PATH = Path("/etc/systemd/system/linopt-auto.timer")
 SERVICE_PATH = Path("/etc/systemd/system/linopt-auto.service")
 SCRIPT_PATH = Path("/usr/local/bin/linopt-maintenance")
@@ -59,13 +58,9 @@ class LinuxOptimizerApp(Gtk.Window):
         self.set_border_width(15)
         self.set_default_size(620, 680)
         self.set_resizable(True)
-        if ICON_PATH.is_file():
-            try:
-                self.set_icon_from_file(str(ICON_PATH))
-            except (GLib.Error, OSError):
-                self.set_icon_name("system-run")
-        else:
-            self.set_icon_name("system-run")
+        # Use a themed icon so the app works both from source and as a .deb.
+        # The packaged SVG is installed in the standard hicolor icon theme.
+        self.set_icon_name("linopt")
 
         notebook = Gtk.Notebook()
         self.add(notebook)
@@ -273,9 +268,10 @@ class LinuxOptimizerApp(Gtk.Window):
             self.update_status(f"Could not save configuration: {exc}")
 
     def on_enable_timer_clicked(self, _button):
+        # Scheduled jobs must not remove installed packages unattended.
+        # `autoremove` remains available as a manually confirmed GUI action.
         script = """#!/bin/sh
 set -eu
-/usr/bin/apt-get autoremove -y
 /usr/bin/apt-get autoclean -y
 /usr/bin/journalctl --vacuum-size=100M
 """
