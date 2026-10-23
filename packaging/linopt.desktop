@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=LinOpt System Optimizer
+Comment=System maintenance and CPU power management
+Exec=pkexec /usr/bin/linopt
+Terminal=false
+Type=Application
+Icon=linopt
+Categories=System;Settings;
+StartupNotify=true
