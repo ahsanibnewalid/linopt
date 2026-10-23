@@ -28,7 +28,7 @@ jobs:
       - name: Install Debian package tooling
         run: sudo apt-get update && sudo apt-get install -y dpkg-dev
       - name: Build Debian package
-        run: ./packaging/build-deb.sh
+        run: sh packaging/build-deb.sh
       - name: Inspect Debian package metadata
         run: dpkg-deb --info dist/linopt_1.2.0_all.deb
       - name: Upload Debian package artifact
