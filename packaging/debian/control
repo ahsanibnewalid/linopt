@@ -1,0 +1,11 @@
+Package: linopt
+Version: 1.2.0
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: LinOpt Maintainers <admin@localhost>
+Depends: python3, python3-gi, gir1.2-gtk-3.0, policykit-1
+Recommends: linux-cpupower, snapd
+Description: GTK desktop utility for Linux system maintenance
+ LinOpt provides manual CPU governor controls, APT cleanup, system journal
+ maintenance, auto-cpufreq configuration, and an optional weekly systemd timer.
