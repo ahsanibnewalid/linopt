@@ -1,26 +1,101 @@
-# LinOpt — Linux System Optimizer
+# LinOpt — Linux System Optimizer Suite
 
-GTK 3 utility for Debian/Ubuntu: APT cleanup, system journal vacuuming, CPU governor controls, optional auto-cpufreq management, configuration editing, and a weekly systemd maintenance timer.
+<p align="center">
+  <img src="assets/linopt-icon.svg" alt="LinOpt app icon" width="180">
+</p>
+
+<p align="center">
+  <strong>A practical GTK desktop utility for Linux system maintenance and CPU power management.</strong>
+</p>
+
+LinOpt is a Python 3 and GTK 3 application designed for Debian and Ubuntu-based Linux systems. It brings common maintenance actions and power-management controls together in one desktop interface, with optional weekly automation using systemd.
+
+## What it does
+
+- **APT maintenance:** remove unused packages and clean the local package cache.
+- **System journal cleanup:** vacuum systemd journal logs to a configurable target currently set to 100 MB.
+- **CPU governor controls:** select a supported CPU scaling governor through `cpupower`.
+- **auto-cpufreq integration:** optionally install, remove, and inspect auto-cpufreq, where Snap support is available.
+- **Configuration editor:** view and save `/etc/auto-cpufreq.conf`.
+- **Weekly automation:** install or disable a systemd timer for routine package and journal maintenance.
+- **Custom branding:** a matching LinOpt SVG icon is included in the repository.
 
 ## Requirements
-Python 3, PyGObject/GTK 3, PolicyKit/pkexec, and systemd. Optional commands include linux-cpupower and snapd.
+
+- Debian/Ubuntu-based Linux with systemd
+- Python 3
+- GTK 3 PyGObject bindings: `python3-gi` and `gir1.2-gtk-3.0`
+- PolicyKit / `pkexec` for graphical administrator authentication
+- Optional: `linux-cpupower` and `snapd`
 
 ## Run from source
-Install `python3-gi`, `gir1.2-gtk-3.0`, and `policykit-1`, then launch with `pkexec python3 linopt.py`.
 
-## Build a Debian package
-From the repository root run:
+Install the main dependencies:
 
-```sh
+```bash
+sudo apt update
+sudo apt install python3 python3-gi gir1.2-gtk-3.0 policykit-1 linux-cpupower
+```
+
+Then launch from the repository directory:
+
+```bash
+pkexec python3 "$PWD/linopt.py"
+```
+
+LinOpt requires administrator privileges for system-level operations. Only run it if you trust the source code.
+
+## Build and install the Debian package
+
+From the repository root:
+
+```bash
 chmod +x packaging/build-deb.sh
 ./packaging/build-deb.sh
 sudo apt install ./dist/linopt_1.2.0_all.deb
 ```
 
-## Background timer
-The optional weekly task runs `apt-get autoremove`, `apt-get autoclean`, and `journalctl --vacuum-size=100M` as root. Review these operations before enabling the timer. Inspect with `systemctl status linopt-auto.timer`; disable with `sudo systemctl disable --now linopt-auto.timer`.
+The build script creates a local `.deb` package under `dist/`; it does not publish a release automatically.
 
-## Repository files
-`linopt.py` is the application; `packaging/` contains Debian metadata, launcher, and build script; `assets/linopt-icon.svg` is the custom icon; `docs/MASTER_PROMPT.md` is the future development prompt.
+## Background automation and safety
 
-Commands are executed without `shell=True`. Test system-level maintenance in a VM before relying on it.
+When enabled, the weekly systemd task runs:
+
+- `apt-get autoremove -y`
+- `apt-get autoclean -y`
+- `journalctl --vacuum-size=100M`
+
+These operations run as root. Package removal can affect software you no longer use, and journal vacuuming permanently removes older logs. Review the behavior before enabling the timer.
+
+Check the timer:
+
+```bash
+systemctl status linopt-auto.timer
+systemctl list-timers linopt-auto.timer
+```
+
+Disable it:
+
+```bash
+sudo systemctl disable --now linopt-auto.timer
+```
+
+## Project structure
+
+- `linopt.py` — main GTK 3 application
+- `assets/linopt-icon.svg` — custom LinOpt icon
+- `packaging/debian/control` — Debian package metadata
+- `packaging/linopt.desktop` — desktop launcher
+- `packaging/build-deb.sh` — local Debian package build script
+- `docs/MASTER_PROMPT.md` — reusable prompt for future feature development
+
+## Security and limitations
+
+- Commands are executed using argument lists rather than `shell=True`.
+- Available CPU governors depend on the CPU, kernel driver, and distribution.
+- auto-cpufreq installation requires Snap support and may not work on every system.
+- Test system-level maintenance in a virtual machine before relying on it on an important computer.
+
+## Status
+
+LinOpt's source and packaging files are being developed. A successful Git commit does not mean the application or Debian package has been tested on a real Linux desktop; validate the build and runtime behavior on your target distribution before production use.
