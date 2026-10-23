@@ -61,11 +61,10 @@ The build script creates a local `.deb` package under `dist/`; it does not publi
 
 When enabled, the weekly systemd task runs:
 
-- `apt-get autoremove -y`
-- `apt-get autoclean -y`
-- `journalctl --vacuum-size=100M`
+- `apt-get autoclean -y` (cleans downloaded package files; it does not uninstall packages)
+- `journalctl --vacuum-size=100M` (permanently removes older journal entries as needed)
 
-These operations run as root. Package removal can affect software you no longer use, and journal vacuuming permanently removes older logs. Review the behavior before enabling the timer.
+The timer runs as root. Journal vacuuming permanently removes older logs. The potentially disruptive `apt-get autoremove` action is available only as a manually confirmed GUI operation, not in unattended maintenance.
 
 Check the timer:
 
@@ -87,6 +86,8 @@ sudo systemctl disable --now linopt-auto.timer
 - `packaging/debian/control` — Debian package metadata
 - `packaging/linopt.desktop` — desktop launcher
 - `packaging/build-deb.sh` — local Debian package build script
+- `tests/test_linopt.py` — safety regression tests
+- `.github/workflows/ci.yml` — syntax checks, regression tests, and Debian package build in GitHub Actions
 - `docs/MASTER_PROMPT.md` — reusable prompt for future feature development
 
 ## Security and limitations
@@ -98,4 +99,4 @@ sudo systemctl disable --now linopt-auto.timer
 
 ## Status
 
-LinOpt's source and packaging files are being developed. A successful Git commit does not mean the application or Debian package has been tested on a real Linux desktop; validate the build and runtime behavior on your target distribution before production use.
+LinOpt is still an early-stage desktop utility. GitHub Actions checks Python syntax, safety regressions, packaging-script syntax, and builds/inspects the Debian package. CI does not validate GUI behavior, administrator authentication, CPU governor support, or systemd behavior on a real desktop. Do not treat LinOpt as production-ready until those manual integration checks pass on supported Debian/Ubuntu releases.
